@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "jsx": "preserve",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "incremental": true
+  },
+  "include": ["**/*.js", "**/*.jsx", ".next/types/**/*.js"],
+  "exclude": ["node_modules"]
+}
