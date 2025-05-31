@@ -4,8 +4,11 @@ import { getPostsByCategory, getCategoryById } from '@/lib/models';
 // GET /api/categories/[id]/posts - Get all posts for a specific category
 export async function GET(request, { params }) {
   try {
+    // Ensure params is properly resolved
+    const resolvedParams = await Promise.resolve(params);
+    
     // Check if category exists
-    const category = await getCategoryById(params.id);
+    const category = await getCategoryById(resolvedParams.id);
     if (!category) {
       return NextResponse.json(
         { error: 'Category not found' },
@@ -13,7 +16,7 @@ export async function GET(request, { params }) {
       );
     }
     
-    const posts = await getPostsByCategory(params.id);
+    const posts = await getPostsByCategory(resolvedParams.id);
     return NextResponse.json(posts);
   } catch (error) {
     console.error('Error fetching posts by category:', error);

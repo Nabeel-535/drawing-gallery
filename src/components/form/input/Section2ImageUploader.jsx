@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import Image from 'next/image';
-import { getImageUploadUrl, cloudinaryConfig } from '@/lib/cloudinary';
+import { getCloudinaryUploadUrl, cloudinaryConfig } from '@/lib/cloudinary';
 import { TrashBinIcon, ChevronUpIcon, ChevronDownIcon } from '@/icons';
 
 const Section2ImageUploader = ({ onImagesUpdate, images = [], className }) => {
@@ -47,7 +47,7 @@ const Section2ImageUploader = ({ onImagesUpdate, images = [], className }) => {
 
       // Upload to Cloudinary
       const response = await fetch(
-        getImageUploadUrl(),
+        getCloudinaryUploadUrl(),
         {
           method: 'POST',
           body: formData,

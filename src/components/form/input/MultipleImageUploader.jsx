@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import Image from 'next/image';
-import { getImageUploadUrl, cloudinaryConfig } from '@/lib/cloudinary';
+import { getCloudinaryUploadUrl, cloudinaryConfig } from '@/lib/cloudinary';
 import { TrashBinIcon, ChevronUpIcon, ChevronDownIcon } from '@/icons';
 
 const MultipleImageUploader = ({ onImagesUpdate, images = [], className, showDescription = false }) => {
@@ -70,7 +70,7 @@ const MultipleImageUploader = ({ onImagesUpdate, images = [], className, showDes
 
       // Upload to Cloudinary
       const response = await fetch(
-        getImageUploadUrl(),
+        getCloudinaryUploadUrl(),
         {
           method: 'POST',
           body: formData,

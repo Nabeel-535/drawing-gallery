@@ -4,7 +4,10 @@ import { getPostBySlugWithCategory } from '@/lib/models';
 // GET /api/posts/slug/[slug] - Get a specific post by slug
 export async function GET(request, { params }) {
   try {
-    const post = await getPostBySlugWithCategory(params.slug);
+    // Ensure params is properly resolved
+    const resolvedParams = await Promise.resolve(params);
+    
+    const post = await getPostBySlugWithCategory(resolvedParams.slug);
     
     if (!post) {
       return NextResponse.json(

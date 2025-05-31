@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import Image from 'next/image';
-import { getImageUploadUrl, cloudinaryConfig } from '@/lib/cloudinary';
+import { getCloudinaryUploadUrl, cloudinaryConfig } from '@/lib/cloudinary';
 
 const CloudinaryUploader = ({ onImageUpload, value, className }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -65,7 +65,7 @@ const CloudinaryUploader = ({ onImageUpload, value, className }) => {
 
       // Upload to Cloudinary
       const response = await fetch(
-        getImageUploadUrl(),
+        getCloudinaryUploadUrl(),
         {
           method: 'POST',
           body: formData,
