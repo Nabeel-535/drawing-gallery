@@ -254,8 +254,7 @@ export default function HomePage() {
               Request Your Custom Drawing!
             </h2>
             <p className="text-xl text-green-100 mb-8 max-w-2xl mx-auto">
-              Have a specific drawing in mind? We can create custom artwork just for you! 
-              Whether it's a portrait, landscape, or any creative concept - we're here to bring your ideas to life.
+            Have a specific drawing in mind? We create custom artwork just for you! Whether it's a cartoon, anime, or your favorite game character – your ideas can be turned into coloring pages.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button

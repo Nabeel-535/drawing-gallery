@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useModal } from "@/hooks/useModal";
 import RequestDrawingModal from "@/components/common/RequestDrawingModal";
 
@@ -11,6 +11,7 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const { data: session } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
   const { isOpen, openModal, closeModal } = useModal(false);
 
   const handleSearch = (e) => {
@@ -19,6 +20,26 @@ export default function Header() {
       router.push(`/gallery?search=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery("");
     }
+  };
+
+  // Helper function to check if a link is active
+  const isActiveLink = (href) => {
+    if (href === "/") {
+      return pathname === "/";
+    }
+    if (href === "/#about") {
+      return pathname === "/" && window.location.hash === "#about";
+    }
+    return pathname.startsWith(href);
+  };
+
+  // Helper function to get link classes
+  const getLinkClasses = (href) => {
+    const baseClasses = "transition-colors dark:text-gray-300";
+    const activeClasses = "text-red-600 font-semibold bg-[#f0f0f0] py-4 px-4";
+    const inactiveClasses = "text-gray-700 hover:text-red-600";
+    
+    return `${baseClasses} ${isActiveLink(href) ? activeClasses : inactiveClasses}`;
   };
 
   return (
@@ -42,19 +63,19 @@ export default function Header() {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
-              <Link href="/" className="text-gray-700 hover:text-red-600 transition-colors dark:text-gray-300 dark:hover:text-red-400">
+              <Link href="/" className={getLinkClasses("/")}>
                 Home
               </Link>
-              <Link href="/gallery" className="text-gray-700 hover:text-red-600 transition-colors dark:text-gray-300 dark:hover:text-red-400">
+              <Link href="/gallery" className={getLinkClasses("/gallery")}>
                 Gallery
               </Link>
-              <Link href="/categories" className="text-gray-700 hover:text-red-600 transition-colors dark:text-gray-300 dark:hover:text-red-400">
+              <Link href="/categories" className={getLinkClasses("/categories")}>
                 Categories
               </Link>
               <Link target="_blank" href="https://www.youtube.com/@Drawing-Gallery/playlists" className="text-gray-700 hover:text-red-600 transition-colors dark:text-gray-300 dark:hover:text-red-400">
                 Video Playlist
               </Link>
-              <Link href="/#about" className="text-gray-700 hover:text-red-600 transition-colors dark:text-gray-300 dark:hover:text-red-400">
+              <Link href="/#about" className={getLinkClasses("/#about")}>
                 About
               </Link>
             </nav>
@@ -168,19 +189,19 @@ export default function Header() {
               </form>
 
               <nav className="flex flex-col space-y-4">
-                <Link href="/" className="text-gray-700 hover:text-red-600 transition-colors">
+                <Link href="/" className={getLinkClasses("/")}>
                   Home
                 </Link>
-                <Link href="/gallery" className="text-gray-700 hover:text-red-600 transition-colors">
+                <Link href="/gallery" className={getLinkClasses("/gallery")}>
                   Gallery
                 </Link>
-                <Link href="/categories" className="text-gray-700 hover:text-red-600 transition-colors">
+                <Link href="/categories" className={getLinkClasses("/categories")}>
                   Categories
                 </Link>
-                <Link href="https://www.youtube.com/@Drawing-Gallery/playlists" className="text-gray-700 hover:text-red-600 0">
+                <Link href="https://www.youtube.com/@Drawing-Gallery/playlists" className="text-gray-700 hover:text-red-600 transition-colors">
                 Video Playlist
               </Link>
-                <Link href="/#about" className="text-gray-700 hover:text-red-600 transition-colors">
+                <Link href="/#about" className={getLinkClasses("/#about")}>
                   About
                 </Link>
                 <div className="pt-4 border-t border-gray-200 dark:border-gray-800 space-y-2">
