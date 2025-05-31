@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { getRawUploadUrl, cloudinaryConfig } from '@/lib/cloudinary';
+import { getCloudinaryUploadUrl, cloudinaryConfig } from '@/lib/cloudinary';
 
 const FileUploader = ({ onFileUpload, value, className, accept = "*/*", label = "Click or drag and drop a file" }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -55,12 +55,11 @@ const FileUploader = ({ onFileUpload, value, className, accept = "*/*", label = 
       // Create form data for upload
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', cloudinaryConfig.rawUploadPreset);
-      // Note: resource_type is determined by the endpoint (raw/upload)
+      formData.append('upload_preset', cloudinaryConfig.uploadPreset);
 
       // Upload to Cloudinary
       const response = await fetch(
-        getRawUploadUrl(),
+        getCloudinaryUploadUrl(),
         {
           method: 'POST',
           body: formData,
