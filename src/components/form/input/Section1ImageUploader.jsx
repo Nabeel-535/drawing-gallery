@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
-import { getCloudinaryUploadUrl, cloudinaryConfig } from '@/lib/cloudinary';
+import { getImageUploadUrl, cloudinaryConfig } from '@/lib/cloudinary';
 import { TrashBinIcon, ChevronUpIcon, ChevronDownIcon } from '@/icons';
 
 const Section1ImageUploader = ({ onImagesUpdate, images = [], className }) => {
@@ -50,7 +50,7 @@ const Section1ImageUploader = ({ onImagesUpdate, images = [], className }) => {
 
       // Upload to Cloudinary
       const response = await fetch(
-        getCloudinaryUploadUrl(),
+        getImageUploadUrl(),
         {
           method: 'POST',
           body: formData,
@@ -211,7 +211,7 @@ const Section1ImageUploader = ({ onImagesUpdate, images = [], className }) => {
       formData.append('file', file);
       formData.append('upload_preset', cloudinaryConfig.uploadPreset);
 
-      const response = await fetch(getCloudinaryUploadUrl(), {
+      const response = await fetch(getImageUploadUrl(), {
         method: 'POST',
         body: formData,
       });

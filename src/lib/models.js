@@ -62,8 +62,8 @@ export async function getPostsWithCategory() {
   const client = await clientPromise;
   const db = client.db();
   
-  // Get all posts
-  const posts = await db.collection('posts').find({}).sort({ createdAt: -1 }).toArray();
+  // Get only published posts for public access
+  const posts = await db.collection('posts').find({ status: "Published" }).sort({ createdAt: -1 }).toArray();
   
   // Get all categories
   const categories = await db.collection('categories').find({}).toArray();
@@ -84,17 +84,63 @@ export async function getPostsWithCategory() {
   return populatedPosts;
 }
 
+// Admin function to get all posts including drafts
+export async function getAllPostsWithCategoryAdmin() {
+  const client = await clientPromise;
+  const db = client.db();
+  
+  // Get all posts including drafts for admin access
+  const posts = await db.collection('posts').find({}).sort({ createdAt: -1 }).toArray();
+  
+  // Get all categories
+  const categories = await db.collection('categories').find({}).toArray();
+  
+  // Create a category lookup map
+  const categoryMap = {};
+  categories.forEach(category => {
+    categoryMap[category._id.toString()] = category;
+  });
+  
+  // Populate posts with category information
+  const populatedPosts = posts.map(post => ({
+    ...post,
+    category: categoryMap[post.categoryId] || null
+  }));
+  
+  return populatedPosts;
+}
+
 export async function getPostsByCategory(categoryId) {
   const client = await clientPromise;
   const db = client.db();
-  return await db.collection('posts').find({ categoryId: categoryId }).sort({ createdAt: -1 }).toArray();
+  return await db.collection('posts').find({ categoryId: categoryId, status: "Published" }).sort({ createdAt: -1 }).toArray();
 }
 
 export async function getPostsByCategoryWithCategory(categoryId) {
   const client = await clientPromise;
   const db = client.db();
   
-  // Get posts by category
+  // Get only published posts by category for public access
+  const posts = await db.collection('posts').find({ categoryId: categoryId, status: "Published" }).sort({ createdAt: -1 }).toArray();
+  
+  // Get the specific category
+  const category = await db.collection('categories').findOne({ _id: new ObjectId(categoryId) });
+  
+  // Populate posts with category information
+  const populatedPosts = posts.map(post => ({
+    ...post,
+    category: category
+  }));
+  
+  return populatedPosts;
+}
+
+// Admin function to get all posts by category including drafts
+export async function getPostsByCategoryWithCategoryAdmin(categoryId) {
+  const client = await clientPromise;
+  const db = client.db();
+  
+  // Get all posts by category including drafts for admin access
   const posts = await db.collection('posts').find({ categoryId: categoryId }).sort({ createdAt: -1 }).toArray();
   
   // Get the specific category
@@ -119,7 +165,32 @@ export async function getPostByIdWithCategory(id) {
   const client = await clientPromise;
   const db = client.db();
   
-  // Get the post
+  // Get the published post for public access
+  const post = await db.collection('posts').findOne({ _id: new ObjectId(id), status: "Published" });
+  
+  if (!post) {
+    return null;
+  }
+  
+  // Get the category if categoryId exists
+  let category = null;
+  if (post.categoryId) {
+    category = await db.collection('categories').findOne({ _id: new ObjectId(post.categoryId) });
+  }
+  
+  // Return post with populated category
+  return {
+    ...post,
+    category: category
+  };
+}
+
+// Admin function to get post by ID including drafts
+export async function getPostByIdWithCategoryAdmin(id) {
+  const client = await clientPromise;
+  const db = client.db();
+  
+  // Get the post regardless of status for admin access
   const post = await db.collection('posts').findOne({ _id: new ObjectId(id) });
   
   if (!post) {
@@ -143,7 +214,32 @@ export async function getPostBySlugWithCategory(slug) {
   const client = await clientPromise;
   const db = client.db();
   
-  // Get the post by slug
+  // Get the published post by slug for public access
+  const post = await db.collection('posts').findOne({ url_slug: slug, status: "Published" });
+  
+  if (!post) {
+    return null;
+  }
+  
+  // Get the category if categoryId exists
+  let category = null;
+  if (post.categoryId) {
+    category = await db.collection('categories').findOne({ _id: new ObjectId(post.categoryId) });
+  }
+  
+  // Return post with populated category
+  return {
+    ...post,
+    category: category
+  };
+}
+
+// Admin function to get post by slug including drafts
+export async function getPostBySlugWithCategoryAdmin(slug) {
+  const client = await clientPromise;
+  const db = client.db();
+  
+  // Get the post by slug regardless of status for admin access
   const post = await db.collection('posts').findOne({ url_slug: slug });
   
   if (!post) {

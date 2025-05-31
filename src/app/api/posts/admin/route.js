@@ -1,16 +1,16 @@
 import { NextResponse } from 'next/server';
-import { getPostsWithCategory, getPostByIdWithCategoryAdmin, createPost } from '@/lib/models';
+import { getAllPostsWithCategoryAdmin, getPostByIdWithCategoryAdmin, createPost } from '@/lib/models';
 
-// GET /api/posts - Get all published posts only
+// GET /api/posts/admin - Get all posts including drafts (admin access)
 export async function GET() {
   try {
-    const posts = await getPostsWithCategory();
+    const posts = await getAllPostsWithCategoryAdmin();
     return NextResponse.json({ 
       success: true,
       posts: posts 
     });
   } catch (error) {
-    console.error('Error fetching posts:', error);
+    console.error('Error fetching posts (admin):', error);
     return NextResponse.json(
       { 
         success: false,
@@ -21,7 +21,7 @@ export async function GET() {
   }
 }
 
-// POST /api/posts - Create a new post
+// POST /api/posts/admin - Create a new post (admin access)
 export async function POST(request) {
   try {
     const data = await request.json();
@@ -53,7 +53,7 @@ export async function POST(request) {
       post: createdPost
     }, { status: 201 });
   } catch (error) {
-    console.error('Error creating post:', error);
+    console.error('Error creating post (admin):', error);
     return NextResponse.json(
       { 
         success: false,
@@ -62,4 +62,4 @@ export async function POST(request) {
       { status: 500 }
     );
   }
-}
+} 

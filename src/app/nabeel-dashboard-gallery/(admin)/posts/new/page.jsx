@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import CloudinaryUploader from "@/components/form/input/CloudinaryUploader";
 import Section1ImageUploader from "@/components/form/input/Section1ImageUploader";
 import Section2ImageUploader from "@/components/form/input/Section2ImageUploader";
+import FileUploader from "@/components/form/input/FileUploader";
 import Image from "next/image";
 
 export default function NewPost() {
@@ -156,7 +157,7 @@ export default function NewPost() {
     console.log('Submitting form data:', formData);
 
     try {
-      const response = await fetch('/api/posts', {
+      const response = await fetch('/api/posts/admin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -229,57 +230,49 @@ export default function NewPost() {
 
             <div>
               <label htmlFor="download_link" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Download Link
+                Main Download File
               </label>
-              <input
-                type="text"
-                id="download_link"
-                name="download_link"
+              <FileUploader 
+                onFileUpload={(url) => setFormData(prev => ({ ...prev, download_link: url }))}
                 value={formData.download_link}
-                onChange={handleChange}
-                className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white/90"
+                label="Upload main download file (PDF, ZIP, etc.)"
+                className="mb-2"
               />
             </div>
 
             <div>
               <label htmlFor="download_5_file" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Download 5x5 File
+                5x5 Size File
               </label>
-              <input
-                type="text"
-                id="download_5_file"
-                name="download_5_file"
+              <FileUploader 
+                onFileUpload={(url) => setFormData(prev => ({ ...prev, download_5_file: url }))}
                 value={formData.download_5_file}
-                onChange={handleChange}
-                className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white/90"
+                label="Upload 5x5 size file"
+                className="mb-2"
               />
             </div>
 
             <div>
               <label htmlFor="download_10_file" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Download 10x10 File
+                10x10 Size File
               </label>
-              <input
-                type="text"
-                id="download_10_file"
-                name="download_10_file"
+              <FileUploader 
+                onFileUpload={(url) => setFormData(prev => ({ ...prev, download_10_file: url }))}
                 value={formData.download_10_file}
-                onChange={handleChange}
-                className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white/90"
+                label="Upload 10x10 size file"
+                className="mb-2"
               />
             </div>
 
             <div>
               <label htmlFor="download_15_file" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Download 15x15 File
+                15x15 Size File
               </label>
-              <input
-                type="text"
-                id="download_15_file"
-                name="download_15_file"
+              <FileUploader 
+                onFileUpload={(url) => setFormData(prev => ({ ...prev, download_15_file: url }))}
                 value={formData.download_15_file}
-                onChange={handleChange}
-                className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white/90"
+                label="Upload 15x15 size file"
+                className="mb-2"
               />
             </div>
 

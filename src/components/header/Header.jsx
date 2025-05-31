@@ -51,7 +51,7 @@ export default function Header() {
               <Link href="/categories" className="text-gray-700 hover:text-red-600 transition-colors dark:text-gray-300 dark:hover:text-red-400">
                 Categories
               </Link>
-              <Link href="https://www.youtube.com/@Drawing-Gallery/playlists" className="text-gray-700 hover:text-red-600 transition-colors dark:text-gray-300 dark:hover:text-red-400">
+              <Link target="_blank" href="https://www.youtube.com/@Drawing-Gallery/playlists" className="text-gray-700 hover:text-red-600 transition-colors dark:text-gray-300 dark:hover:text-red-400">
                 Video Playlist
               </Link>
               <Link href="/#about" className="text-gray-700 hover:text-red-600 transition-colors dark:text-gray-300 dark:hover:text-red-400">
@@ -177,10 +177,10 @@ export default function Header() {
                 <Link href="/categories" className="text-gray-700 hover:text-red-600 transition-colors">
                   Categories
                 </Link>
-                <Link href="/tutorials" className="text-gray-700 hover:text-red-600 transition-colors">
-                  Tutorials
-                </Link>
-                <Link href="/about" className="text-gray-700 hover:text-red-600 transition-colors">
+                <Link href="https://www.youtube.com/@Drawing-Gallery/playlists" className="text-gray-700 hover:text-red-600 0">
+                Video Playlist
+              </Link>
+                <Link href="/#about" className="text-gray-700 hover:text-red-600 transition-colors">
                   About
                 </Link>
                 <div className="pt-4 border-t border-gray-200 dark:border-gray-800 space-y-2">

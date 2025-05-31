@@ -110,7 +110,7 @@ export default function PostClient({ params }) {
 
   return (
     <div className="min-h-screen mainbg ">
-      <div className="container mx-auto px-4 py-8 bg-gradient-to-br from-red-50 via-white to-orange-50 ">
+      <div className="container max-w-7xl mx-auto px-4 py-8 bg-gradient-to-br from-red-50 via-white to-orange-50 ">
         {/* Breadcrumb */}
         <nav className="mb-8">
           <div className="flex items-center space-x-2 text-sm text-gray-600">
@@ -156,20 +156,20 @@ export default function PostClient({ params }) {
             {/* Section 1: Drawing Steps */}
             {post.section1_images && post.section1_images.length > 0 && (
               <div className="mb-8 w-full">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Drawing Steps</h2>
+               
                 
                 <div className=" w-full">
                   {post.section1_images.map((image, index) => (
                     <div key={index} className="flex justify-center">
-                      <div className="bg-white p-6 shadow-sm w-full 2xl:max-w-4xl max-w-3xl">
+                      <div className="bg-white m-2 w-full max-w-3xl">
                         {/* Main Drawing Image with border */}
                         {image.main_image_url && (
                           <div className="relative rounded-sm overflow-hidden border-2 border-gray-300 mb-4">
                             <Image
                               src={image.main_image_url}
                               alt={image.title || `Step ${index + 1}`}
-                              width={400}
-                              height={400}
+                              width={500}
+                              height={500}
                               className="object-contain bg-white w-full h-auto"
                             />
                           </div>
@@ -182,19 +182,54 @@ export default function PostClient({ params }) {
                         
                         {/* Download Buttons */}
                         <div className="flex gap-2 flex-col justify-between items-center">
-                          {image.pdfUrl && (
+                          {image.imageUrl && (
                             <button
-                              onClick={() => window.open(image.pdfUrl, '_blank')}
+                              onClick={() => {
+                                const printWindow = window.open('', '_blank');
+                                printWindow.document.write(`
+                                  <html>
+                                    <head>
+                                      <title>Print Coloring Page</title>
+                                      <style>
+                                        body { 
+                                          margin: 0; 
+                                          padding: 0; 
+                                          display: flex;
+                                          justify-content: center;
+                                          align-items: center;
+                                          min-height: 100vh;
+                                        }
+                                        img { 
+                                          width: 100%;
+                                          height: auto;
+                                        }
+                                        @media print {
+                                          body { margin: 0; padding: 0; }
+                                          img { 
+                                            width: 100%;
+                                            height: auto;
+                                            page-break-inside: avoid; 
+                                          }
+                                        }
+                                      </style>
+                                    </head>
+                                    <body>
+                                      <img src="${image.imageUrl}" onload="window.print(); window.close();" />
+                                    </body>
+                                  </html>
+                                `);
+                                printWindow.document.close();
+                              }}
                               className="flex-1 px-10 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors font-medium text-sm"
                             >
                               Print
                             </button>
                           )}
                           
-                          {image.imageUrl && (
+                          {image.pdfUrl && (
                             <a
-                              href={image.imageUrl}
-                              download
+                              href={image.pdfUrl}
+                              target="_blank"
                               className="flex-1 px-10 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors font-medium text-sm text-center"
                             >
                               Download
@@ -274,7 +309,7 @@ export default function PostClient({ params }) {
                 <div className=" w-full">
                   {post.section2_images.map((image, index) => (
                     <div key={index} className="flex justify-center">
-                      <div className="bg-white p-6 shadow-sm w-full 2xl:max-w-4xl max-w-3xl ">
+                      <div className="bg-white m-2 w-full max-w-3xl ">
                         {/* Image with border */}
                         {image.imageUrl && (
                           <div className="relative rounded-sm overflow-hidden border-2 border-gray-300 mb-4">

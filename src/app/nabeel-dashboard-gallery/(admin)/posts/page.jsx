@@ -17,7 +17,7 @@ export default function PostsManagement() {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/posts');
+        const response = await fetch('/api/posts/admin');
         if (!response.ok) {
           throw new Error('Failed to fetch posts');
         }
@@ -42,7 +42,7 @@ export default function PostsManagement() {
     }
 
     try {
-      const response = await fetch(`/api/posts/${id}`, {
+      const response = await fetch(`/api/posts/admin/${id}`, {
         method: 'DELETE',
       });
 

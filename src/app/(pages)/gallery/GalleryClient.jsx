@@ -45,7 +45,7 @@ export default function GalleryClient() {
         const categoriesData = await categoriesResponse.json();
         
         setPosts(postsData.posts || []);
-        setCategories(categoriesData.categories || []);
+        setCategories(categoriesData || []);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
