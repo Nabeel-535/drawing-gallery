@@ -17,8 +17,11 @@ export default function EditPost({ params }) {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [slugError, setSlugError] = useState('');
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(true); // Default to true for edit mode
   const [formData, setFormData] = useState({
     title: "",
+    url_slug: "",
     content: "",
     categoryId: "",
     author: "",
@@ -33,6 +36,39 @@ export default function EditPost({ params }) {
     section2_title: "",
     tags: []
   });
+
+  // Function to generate URL-friendly slug
+  const generateSlug = (text) => {
+    return text
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '') // Remove special characters except spaces and hyphens
+      .replace(/[\s_-]+/g, '-') // Replace spaces, underscores, and multiple hyphens with single hyphen
+      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+  };
+
+  // Function to validate slug format
+  const validateSlug = (slug) => {
+    if (!slug) {
+      return 'Slug is required';
+    }
+    
+    if (slug.length < 3) {
+      return 'Slug must be at least 3 characters long';
+    }
+    
+    if (slug.length > 100) {
+      return 'Slug must be less than 100 characters';
+    }
+    
+    // Check if slug contains only valid characters
+    const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+    if (!slugRegex.test(slug)) {
+      return 'Slug can only contain lowercase letters, numbers, and hyphens. It cannot start or end with a hyphen.';
+    }
+    
+    return '';
+  };
 
   // Fetch post data and categories
   useEffect(() => {
@@ -60,6 +96,7 @@ export default function EditPost({ params }) {
         setCategories(categoriesData);
         setFormData({
           title: postData.title || "",
+          url_slug: postData.url_slug || "",
           content: postData.content || "",
           categoryId: postData.categoryId || "",
           author: postData.author || "",
@@ -74,6 +111,12 @@ export default function EditPost({ params }) {
           section2_title: postData.section2_title || "",
           tags: postData.tags || []
         });
+        
+        // Validate the existing slug
+        if (postData.url_slug) {
+          const error = validateSlug(postData.url_slug);
+          setSlugError(error);
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
         alert('Failed to load post data');
@@ -104,10 +147,35 @@ export default function EditPost({ params }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    if (name === 'title' && !isSlugManuallyEdited) {
+      // Auto-generate slug from title if slug hasn't been manually edited
+      const newSlug = generateSlug(value);
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+        url_slug: newSlug
+      }));
+      // Validate the auto-generated slug
+      const error = validateSlug(newSlug);
+      setSlugError(error);
+    } else if (name === 'url_slug') {
+      // Handle manual slug editing
+      setIsSlugManuallyEdited(true);
+      const cleanSlug = generateSlug(value);
+      setFormData(prev => ({
+        ...prev,
+        [name]: cleanSlug
+      }));
+      // Validate the slug
+      const error = validateSlug(cleanSlug);
+      setSlugError(error);
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleTagsChange = (e) => {
@@ -184,6 +252,15 @@ export default function EditPost({ params }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate slug before submission
+    const slugValidationError = validateSlug(formData.url_slug);
+    if (slugValidationError) {
+      setSlugError(slugValidationError);
+      alert('Please fix the slug validation error before submitting.');
+      return;
+    }
+    
     setLoading(true);
 
     // Debug: Log the form data being submitted
@@ -249,6 +326,39 @@ export default function EditPost({ params }) {
                 required
                 className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white/90"
               />
+            </div>
+
+            <div>
+              <label htmlFor="url_slug" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Slug
+              </label>
+              <input
+                type="text"
+                id="url_slug"
+                name="url_slug"
+                value={formData.url_slug}
+                onChange={handleChange}
+                required
+                placeholder="url-friendly-slug"
+                className={`w-full rounded-md border px-4 py-2 text-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-800 dark:text-white/90 ${
+                  slugError 
+                    ? 'border-red-500 dark:border-red-500' 
+                    : 'border-gray-300 dark:border-gray-700'
+                }`}
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                The slug is used in the URL (e.g., /posts/your-slug). Edit carefully as this affects the post's URL.
+              </p>
+              {slugError && (
+                <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                  {slugError}
+                </p>
+              )}
+              {formData.url_slug && !slugError && (
+                <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                  ✓ URL will be: /posts/{formData.url_slug}
+                </p>
+              )}
             </div>
 
             <div>

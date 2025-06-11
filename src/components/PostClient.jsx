@@ -23,18 +23,16 @@ export default function PostClient({ params }) {
         if (data.success) {
           setPost(data.post);
           
-          // Fetch related posts by category
-          if (data.post.categoryId) {
-            const relatedResponse = await fetch(`/api/categories/${data.post.categoryId}/posts`);
-            if (relatedResponse.ok) {
-              const relatedData = await relatedResponse.json();
-              // Filter out current post and limit to 6 posts
-              const filtered = relatedData.filter(p => p._id !== data.post._id).slice(0, 6);
-              setRelatedPosts(filtered);
-              
-              // Get first 5 as featured posts for sidebar
-              setFeaturedPosts(filtered.slice(0, 5));
-            }
+          // Fetch latest 9 posts for related section
+          const relatedResponse = await fetch('/api/posts');
+          if (relatedResponse.ok) {
+            const relatedData = await relatedResponse.json();
+            // Filter out current post and limit to 9 posts
+            const filtered = relatedData.posts.filter(p => p._id !== data.post._id).slice(0, 9);
+            setRelatedPosts(filtered);
+            
+            // Get first 5 as featured posts for sidebar
+            setFeaturedPosts(filtered.slice(0, 5));
           }
         } else {
           console.error('Post not found');
@@ -364,10 +362,10 @@ export default function PostClient({ params }) {
             {relatedPosts.length > 0 && (
               <div className="bg-white rounded-xl p-6 shadow-sm">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-                  Related Posts in {post.category?.name}
+                  Latest Coloring Pages
                 </h2>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-3 gap-6">
                   {relatedPosts.map((relatedPost) => (
                     <Link
                       key={relatedPost._id}

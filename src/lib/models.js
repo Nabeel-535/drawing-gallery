@@ -263,9 +263,16 @@ export async function createPost(postData) {
   const client = await clientPromise;
   const db = client.db();
   
-  // Generate URL slug from title
-  const baseSlug = generateSlug(postData.title);
-  const url_slug = await ensureUniqueSlug(db, baseSlug);
+  // Use provided url_slug or generate from title
+  let url_slug;
+  if (postData.url_slug) {
+    // If url_slug is provided, ensure it's unique
+    url_slug = await ensureUniqueSlug(db, postData.url_slug);
+  } else {
+    // Generate URL slug from title if no url_slug is provided
+    const baseSlug = generateSlug(postData.title);
+    url_slug = await ensureUniqueSlug(db, baseSlug);
+  }
   
   // Ensure section1_images have proper structure
   if (postData.section1_images) {
@@ -301,11 +308,17 @@ export async function updatePost(id, postData) {
   const client = await clientPromise;
   const db = client.db();
   
-  // Generate new URL slug if title has changed
   let updateData = { ...postData };
-  if (postData.title) {
+  
+  // Only generate URL slug from title if no url_slug is provided
+  // This allows manual slug editing while maintaining auto-generation for new posts
+  if (postData.title && !postData.url_slug) {
     const baseSlug = generateSlug(postData.title);
     const url_slug = await ensureUniqueSlug(db, baseSlug, id);
+    updateData.url_slug = url_slug;
+  } else if (postData.url_slug) {
+    // If url_slug is provided, ensure it's unique (excluding current post)
+    const url_slug = await ensureUniqueSlug(db, postData.url_slug, id);
     updateData.url_slug = url_slug;
   }
   
