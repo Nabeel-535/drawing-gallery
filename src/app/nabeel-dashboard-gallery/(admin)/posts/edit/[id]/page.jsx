@@ -61,10 +61,30 @@ export default function EditPost({ params }) {
       return 'Slug must be less than 100 characters';
     }
     
-    // Check if slug contains only valid characters
-    const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+    // Check for spaces
+    if (/\s/.test(slug)) {
+      return 'Slug cannot contain spaces. Use hyphens (-) instead.';
+    }
+    
+    // Check for uppercase letters
+    if (/[A-Z]/.test(slug)) {
+      return 'Slug must be lowercase only.';
+    }
+    
+    // Check if it starts or ends with hyphen
+    if (slug.startsWith('-') || slug.endsWith('-')) {
+      return 'Slug cannot start or end with a hyphen.';
+    }
+    
+    // Check for invalid characters
+    const slugRegex = /^[a-z0-9-]+$/;
     if (!slugRegex.test(slug)) {
-      return 'Slug can only contain lowercase letters, numbers, and hyphens. It cannot start or end with a hyphen.';
+      return 'Slug can only contain lowercase letters, numbers, and hyphens.';
+    }
+    
+    // Check for consecutive hyphens
+    if (/--/.test(slug)) {
+      return 'Slug cannot contain consecutive hyphens.';
     }
     
     return '';
@@ -160,15 +180,15 @@ export default function EditPost({ params }) {
       const error = validateSlug(newSlug);
       setSlugError(error);
     } else if (name === 'url_slug') {
-      // Handle manual slug editing
+      // Handle manual slug editing - give user complete freedom
       setIsSlugManuallyEdited(true);
-      const cleanSlug = generateSlug(value);
+      
       setFormData(prev => ({
         ...prev,
-        [name]: cleanSlug
+        [name]: value // Use the raw value without any cleaning
       }));
-      // Validate the slug
-      const error = validateSlug(cleanSlug);
+      // Validate the raw slug and show errors
+      const error = validateSlug(value);
       setSlugError(error);
     } else {
       setFormData(prev => ({

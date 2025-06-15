@@ -166,8 +166,10 @@ export default function PostClient({ params }) {
                             <Image
                               src={image.main_image_url}
                               alt={image.title || `Step ${index + 1}`}
-                              width={500}
-                              height={500}
+                              width={1200}
+                              height={1200}
+                              quality={100}
+                              unoptimized={true}
                               className="object-contain bg-white w-full h-auto"
                             />
                           </div>
@@ -314,8 +316,10 @@ export default function PostClient({ params }) {
                             <Image
                               src={image.imageUrl}
                               alt={image.title || `Resource ${index + 1}`}
-                              width={400}
-                              height={400}
+                              width={1200}
+                              height={1200}
+                              quality={100}
+                              unoptimized={true}
                               className="object-contain bg-white w-full h-auto"
                             />
                           </div>
