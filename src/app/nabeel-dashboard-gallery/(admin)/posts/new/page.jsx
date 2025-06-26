@@ -32,7 +32,8 @@ export default function NewPost() {
     section1_images: [],
     section2_images: [],
     section2_title: "",
-    tags: []
+    tags: [],
+    keywords: ""
   });
 
   // Function to generate URL-friendly slug
@@ -485,6 +486,24 @@ export default function NewPost() {
                   </div>
                 </div>
               )}
+            </div>
+
+            <div>
+              <label htmlFor="keywords" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                SEO Keywords
+              </label>
+              <input
+                type="text"
+                id="keywords"
+                name="keywords"
+                value={formData.keywords}
+                onChange={handleChange}
+                placeholder="Enter SEO keywords separated by commas (e.g., how to draw, drawing tutorial, step by step)"
+                className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white/90"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                These keywords help search engines understand your content. Use relevant terms that people might search for.
+              </p>
             </div>
 
             <div>

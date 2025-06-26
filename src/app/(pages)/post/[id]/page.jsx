@@ -36,7 +36,8 @@ export async function generateMetadata({ params }) {
       post.category?.name,
       'drawing guide',
       'step by step drawing',
-      ...(post.tags || [])
+      ...(post.tags || []),
+      ...(post.keywords ? post.keywords.split(',').map(k => k.trim()).filter(k => k.length > 0) : [])
     ].filter(Boolean),
     openGraph: {
       title: post.title,
