@@ -23,16 +23,20 @@ export default function PostClient({ params }) {
         if (data.success) {
           setPost(data.post);
           
-          // Fetch latest 9 posts for related section
+          // Fetch posts from the same category
           const relatedResponse = await fetch('/api/posts');
           if (relatedResponse.ok) {
             const relatedData = await relatedResponse.json();
-            // Filter out current post and limit to 9 posts
-            const filtered = relatedData.posts.filter(p => p._id !== data.post._id).slice(0, 9);
-            setRelatedPosts(filtered);
+            // Filter posts from same category, exclude current post, limit to 9 for related section
+            const categoryFiltered = relatedData.posts.filter(p => 
+              p._id !== data.post._id && 
+              p.categoryId === data.post.categoryId
+            );
+            const limitedRelated = categoryFiltered.slice(0, 9);
+            setRelatedPosts(limitedRelated);
             
-            // Get first 5 as featured posts for sidebar
-            setFeaturedPosts(filtered.slice(0, 5));
+            // Get first 5 from same category for featured posts sidebar
+            setFeaturedPosts(categoryFiltered.slice(0, 5));
           }
         } else {
           console.error('Post not found');
@@ -159,7 +163,7 @@ export default function PostClient({ params }) {
                 <div className=" w-full">
                   {post.section1_images.map((image, index) => (
                     <div key={index} className="flex justify-center">
-                      <div className="bg-white m-2 w-full max-w-3xl">
+                      <div className="bg-white m-2 w-full max-w-2xl">
                         {/* Main Drawing Image with border */}
                         {image.main_image_url && (
                           <div className="relative rounded-sm overflow-hidden border-2 border-gray-300 mb-4">
@@ -309,7 +313,7 @@ export default function PostClient({ params }) {
                 <div className=" w-full">
                   {post.section2_images.map((image, index) => (
                     <div key={index} className="flex justify-center">
-                      <div className="bg-white m-2 w-full max-w-3xl ">
+                      <div className="bg-white m-2 w-full max-w-2xl ">
                         {/* Image with border */}
                         {image.imageUrl && (
                           <div className="relative rounded-sm overflow-hidden border-2 border-gray-300 mb-4">
@@ -398,7 +402,7 @@ export default function PostClient({ params }) {
 
           {/* Sidebar - Featured Posts */}
           <div className="lg:col-span-1">
-            <div className="sticky top-8 space-y-6">
+            <div className=" top-8 space-y-6">
               {/* Featured Posts */}
               {featuredPosts.length > 0 && (
                 <div className="bg-white rounded-xl p-6 shadow-lg">
