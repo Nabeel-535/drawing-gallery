@@ -407,3 +407,94 @@ export async function deleteCategory(id) {
   const result = await db.collection('categories').deleteOne({ _id: new ObjectId(id) });
   return result;
 }
+
+// New function for paginated posts with filtering and sorting
+export async function getPostsWithCategoryPaginated({
+  page = 1,
+  limit = 20,
+  sort = 'newest',
+  category = null,
+  search = null
+}) {
+  const client = await clientPromise;
+  const db = client.db();
+  
+  // Build query filter
+  let query = { status: "Published" };
+  
+  // Add category filter if specified
+  if (category && category !== 'all') {
+    query.categoryId = category;
+  }
+  
+  // Add search filter if specified
+  if (search && search.trim()) {
+    const searchRegex = new RegExp(search.trim(), 'i');
+    query.$or = [
+      { title: searchRegex },
+      { description: searchRegex },
+      { tags: { $in: [searchRegex] } }
+    ];
+  }
+  
+  // Build sort object
+  let sortObj = {};
+  switch (sort) {
+    case 'newest':
+      sortObj = { createdAt: -1 };
+      break;
+    case 'oldest':
+      sortObj = { createdAt: 1 };
+      break;
+    case 'a-z':
+      sortObj = { title: 1 };
+      break;
+    case 'z-a':
+      sortObj = { title: -1 };
+      break;
+    default:
+      sortObj = { createdAt: -1 };
+  }
+  
+  // Calculate pagination
+  const skip = (page - 1) * limit;
+  
+  // Get total count for pagination
+  const totalPosts = await db.collection('posts').countDocuments(query);
+  const totalPages = Math.ceil(totalPosts / limit);
+  
+  // Get posts with pagination
+  const posts = await db.collection('posts')
+    .find(query)
+    .sort(sortObj)
+    .skip(skip)
+    .limit(limit)
+    .toArray();
+  
+  // Get all categories for population
+  const categories = await db.collection('categories').find({}).toArray();
+  
+  // Create a category lookup map
+  const categoryMap = {};
+  categories.forEach(category => {
+    categoryMap[category._id.toString()] = category;
+  });
+  
+  // Populate posts with category information
+  const populatedPosts = posts.map(post => ({
+    ...post,
+    category: categoryMap[post.categoryId] || null
+  }));
+  
+  return {
+    posts: populatedPosts,
+    pagination: {
+      currentPage: page,
+      totalPages,
+      totalPosts,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
+      limit
+    }
+  };
+}

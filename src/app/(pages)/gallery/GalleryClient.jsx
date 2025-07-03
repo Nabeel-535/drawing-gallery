@@ -11,8 +11,13 @@ export default function GalleryClient() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
-  const [filteredPosts, setFilteredPosts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalPosts, setTotalPosts] = useState(0);
+  const [postsPerPage] = useState(20); // Number of posts per page
   
   const searchParams = useSearchParams();
 
@@ -20,6 +25,7 @@ export default function GalleryClient() {
   useEffect(() => {
     const urlSearchQuery = searchParams.get('search');
     const urlCategory = searchParams.get('category');
+    const urlPage = searchParams.get('page');
     
     if (urlSearchQuery) {
       setSearchQuery(urlSearchQuery);
@@ -28,97 +34,200 @@ export default function GalleryClient() {
     if (urlCategory) {
       setSelectedCategory(urlCategory);
     }
+    
+    if (urlPage) {
+      const pageNum = parseInt(urlPage);
+      if (pageNum > 0) {
+        setCurrentPage(pageNum);
+      }
+    }
   }, [searchParams]);
 
-  // Fetch posts and categories
-  useEffect(() => {
-    const fetchData = async () => {
+  // Fetch posts with pagination
+  const fetchPosts = async (page = 1, category = 'all', search = '', sort = 'newest') => {
       try {
         setLoading(true);
         
-        // Fetch posts with categories
-        const postsResponse = await fetch('/api/posts');
-        const postsData = await postsResponse.json();
-        
-        // Fetch categories
-        const categoriesResponse = await fetch('/api/categories');
-        const categoriesData = await categoriesResponse.json();
-        
-        setPosts(postsData.posts || []);
-        setCategories(categoriesData || []);
+      // Build query parameters
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: postsPerPage.toString(),
+        sort: sort,
+      });
+      
+      if (category !== 'all') {
+        params.append('category', category);
+      }
+      
+      if (search.trim()) {
+        params.append('search', search.trim());
+      }
+      
+      const response = await fetch(`/api/posts?${params}`);
+      const data = await response.json();
+      
+      setPosts(data.posts || []);
+      setTotalPages(data.totalPages || 1);
+      setTotalPosts(data.totalPosts || 0);
       } catch (error) {
-        console.error('Error fetching data:', error);
+      console.error('Error fetching posts:', error);
+      setPosts([]);
+      setTotalPages(1);
+      setTotalPosts(0);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        const data = await response.json();
+        setCategories(data || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
   }, []);
 
-  // Filter and sort posts
+  // Fetch posts when filters change
   useEffect(() => {
-    let filtered = [...posts];
+    fetchPosts(currentPage, selectedCategory, searchQuery, sortBy);
+  }, [currentPage, selectedCategory, searchQuery, sortBy, postsPerPage]);
 
-    // Filter by search query - prioritize tags search
+  // Handle filter changes - reset to page 1
+  const handleFilterChange = (newCategory, newSearch, newSort) => {
+    setCurrentPage(1);
+    if (newCategory !== undefined) setSelectedCategory(newCategory);
+    if (newSearch !== undefined) setSearchQuery(newSearch);
+    if (newSort !== undefined) setSortBy(newSort);
+    
+    // Update URL
+    const params = new URLSearchParams();
+    if (newSearch && newSearch.trim()) {
+      params.append('search', newSearch.trim());
+    }
+    if (newCategory && newCategory !== 'all') {
+      params.append('category', newCategory);
+    }
+    params.append('page', '1');
+    
+    window.history.replaceState({}, '', `/gallery?${params}`);
+  };
+
+  // Handle page change
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    
+    // Update URL
+    const params = new URLSearchParams();
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim();
-      filtered = filtered.filter(post => {
-        // Primary search: tags
-        const tagsMatch = post.tags?.some(tag => tag.toLowerCase().includes(query));
-        
-        // Secondary search: other fields
-        const titleMatch = post.title?.toLowerCase().includes(query);
-        const descriptionMatch = post.description?.toLowerCase().includes(query);
-        const categoryMatch = post.category?.name?.toLowerCase().includes(query);
-        
-        // Prioritize posts with tag matches
-        return tagsMatch || titleMatch || descriptionMatch || categoryMatch;
-      });
-      
-      // Sort by relevance: tag matches first
-      filtered.sort((a, b) => {
-        const aTagMatch = a.tags?.some(tag => tag.toLowerCase().includes(query.toLowerCase()));
-        const bTagMatch = b.tags?.some(tag => tag.toLowerCase().includes(query.toLowerCase()));
-        
-        if (aTagMatch && !bTagMatch) return -1;
-        if (!aTagMatch && bTagMatch) return 1;
-        return 0;
-      });
+      params.append('search', searchQuery.trim());
     }
-
-    // Filter by category
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(post => post.categoryId === selectedCategory);
+      params.append('category', selectedCategory);
     }
-
-    // Sort posts (after relevance sorting for search)
-    if (!searchQuery.trim()) {
-      filtered.sort((a, b) => {
-        if (sortBy === 'newest') {
-          const dateA = new Date(a.createdAt);
-          const dateB = new Date(b.createdAt);
-          return dateB - dateA;
-        } else if (sortBy === 'oldest') {
-          const dateA = new Date(a.createdAt);
-          const dateB = new Date(b.createdAt);
-          return dateA - dateB;
-        } else if (sortBy === 'a-z') {
-          return a.title.localeCompare(b.title);
-        } else if (sortBy === 'z-a') {
-          return b.title.localeCompare(a.title);
-        }
-        return 0;
-      });
-    }
-
-    setFilteredPosts(filtered);
-  }, [posts, selectedCategory, sortBy, searchQuery]);
+    params.append('page', newPage.toString());
+    
+    window.history.replaceState({}, '', `/gallery?${params}`);
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const clearSearch = () => {
-    setSearchQuery('');
-    // Update URL without search parameter
-    window.history.replaceState({}, '', '/gallery');
+    handleFilterChange('all', '', 'newest');
+  };
+
+  // Pagination component
+  const PaginationControls = () => {
+    if (totalPages <= 1) return null;
+
+    const getPageNumbers = () => {
+      const pages = [];
+      const maxVisible = 5;
+      
+      if (totalPages <= maxVisible) {
+        // Show all pages if total is small
+        for (let i = 1; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        // Show smart pagination
+        if (currentPage <= 3) {
+          // Show first pages
+          for (let i = 1; i <= 4; i++) {
+            pages.push(i);
+          }
+          pages.push('...');
+          pages.push(totalPages);
+        } else if (currentPage >= totalPages - 2) {
+          // Show last pages
+          pages.push(1);
+          pages.push('...');
+          for (let i = totalPages - 3; i <= totalPages; i++) {
+            pages.push(i);
+          }
+        } else {
+          // Show middle pages
+          pages.push(1);
+          pages.push('...');
+          for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+            pages.push(i);
+          }
+          pages.push('...');
+          pages.push(totalPages);
+        }
+      }
+      
+      return pages;
+    };
+
+    return (
+      <div className="flex justify-center items-center space-x-2 mt-8">
+        {/* Previous button */}
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Previous
+        </button>
+
+        {/* Page numbers */}
+        {getPageNumbers().map((page, index) => (
+          <React.Fragment key={index}>
+            {page === '...' ? (
+              <span className="px-3 py-2 text-sm text-gray-500">...</span>
+            ) : (
+              <button
+                onClick={() => handlePageChange(page)}
+                className={`px-3 py-2 text-sm font-medium rounded-lg ${
+                  currentPage === page
+                    ? 'bg-red-600 text-white'
+                    : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-700'
+                }`}
+              >
+                {page}
+              </button>
+            )}
+          </React.Fragment>
+        ))}
+
+        {/* Next button */}
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Next
+        </button>
+      </div>
+    );
   };
 
   if (loading) {
@@ -160,13 +269,14 @@ export default function GalleryClient() {
         )}
 
         {/* Filters */}
-        <div className="flex items-center justify-end gap-2 mb-8">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-2">
           {/* Category Filter */}
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-gray-700">Filter:</span>
             <select
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+                onChange={(e) => handleFilterChange(e.target.value, searchQuery, sortBy)}
               className="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-red-500 focus:border-transparent"
             >
               <option value="all">All Categories</option>
@@ -178,13 +288,12 @@ export default function GalleryClient() {
             </select>
           </div>
 
-          {/* Sort and Results */}
-          <div className="flex items-center gap-6">
+            {/* Sort */}
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-gray-700">Sort:</span>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+                onChange={(e) => handleFilterChange(selectedCategory, searchQuery, e.target.value)}
                 className="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-red-500 focus:border-transparent"
               >
                 <option value="newest">Newest</option>
@@ -193,15 +302,23 @@ export default function GalleryClient() {
                 <option value="z-a">Z-A</option>
               </select>
             </div>
-            
-            <div className="text-sm text-gray-600">
-              {filteredPosts.length} {filteredPosts.length === 1 ? 'item' : 'items'}
             </div>
+            
+          {/* Results count and pagination info */}
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-gray-600">
+              Showing {posts.length > 0 ? ((currentPage - 1) * postsPerPage + 1) : 0} - {Math.min(currentPage * postsPerPage, totalPosts)} of {totalPosts} {totalPosts === 1 ? 'item' : 'items'}
+            </div>
+            {totalPages > 1 && (
+              <div className="text-sm text-gray-600">
+                Page {currentPage} of {totalPages}
+              </div>
+            )}
           </div>
         </div>
 
         {/* Gallery Grid */}
-        {filteredPosts.length === 0 ? (
+        {posts.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-6xl mb-4">
               {searchQuery ? "🔍" : "🎨"}
@@ -226,7 +343,7 @@ export default function GalleryClient() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {filteredPosts.map((post) => (
+            {posts.map((post) => (
               <Link
                 key={post._id}
                 href={`/post/${post.url_slug}`}
@@ -275,8 +392,11 @@ export default function GalleryClient() {
           </div>
         )}
 
+        {/* Pagination Controls */}
+        <PaginationControls />
+
         {/* YouTube Channel CTA */}
-        {filteredPosts.length > 0 && (
+        {posts.length > 0 && (
           <div className="text-center mt-12">
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <p className="text-gray-600 mb-4">

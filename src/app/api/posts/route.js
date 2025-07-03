@@ -1,13 +1,44 @@
 import { NextResponse } from 'next/server';
-import { getPostsWithCategory, getPostByIdWithCategoryAdmin, createPost } from '@/lib/models';
+import { getPostsWithCategory, getPostByIdWithCategoryAdmin, createPost, getPostsWithCategoryPaginated } from '@/lib/models';
 
-// GET /api/posts - Get all published posts only
-export async function GET() {
+// GET /api/posts - Get all published posts with pagination support
+export async function GET(request) {
   try {
-    const posts = await getPostsWithCategory();
+    const { searchParams } = new URL(request.url);
+    
+    // Check if pagination is requested
+    const page = searchParams.get('page');
+    const limit = searchParams.get('limit');
+    const sort = searchParams.get('sort');
+    const category = searchParams.get('category');
+    const search = searchParams.get('search');
+    
+    // If no pagination params, return all posts (backward compatibility)
+    if (!page && !limit) {
+      const posts = await getPostsWithCategory();
+      return NextResponse.json({ 
+        success: true,
+        posts: posts 
+      });
+    }
+    
+    // Use paginated function
+    const result = await getPostsWithCategoryPaginated({
+      page: parseInt(page) || 1,
+      limit: parseInt(limit) || 20,
+      sort: sort || 'newest',
+      category: category || 'all',
+      search: search || ''
+    });
+    
     return NextResponse.json({ 
       success: true,
-      posts: posts 
+      posts: result.posts,
+      totalPages: result.pagination.totalPages,
+      totalPosts: result.pagination.totalPosts,
+      currentPage: result.pagination.currentPage,
+      hasNextPage: result.pagination.hasNextPage,
+      hasPrevPage: result.pagination.hasPrevPage
     });
   } catch (error) {
     console.error('Error fetching posts:', error);

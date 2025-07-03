@@ -1,6 +1,12 @@
 import { Metadata } from 'next';
 import GalleryClient from './GalleryClient';
 
+// ISR - Revalidate every 1800 seconds (30 minutes)
+export const revalidate = 1800;
+
+// Dynamic rendering strategy for gallery
+export const dynamic = 'force-static';
+
 export const metadata = {
   title: 'Drawing Gallery - Free Printable Coloring Pages & Drawing Tutorials',
   description: 'Browse our collection of free printable coloring pages and drawing tutorials. Download high-quality images perfect for kids, adults, and art enthusiasts.',

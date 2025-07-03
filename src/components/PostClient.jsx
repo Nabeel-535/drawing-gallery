@@ -5,10 +5,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { use } from 'react';
 
-export default function PostClient({ params }) {
+export default function PostClient({ params, initialPost = null }) {
   const resolvedParams = use(params);
-  const [post, setPost] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [post, setPost] = useState(initialPost);
+  const [loading, setLoading] = useState(!initialPost);
   const [relatedPosts, setRelatedPosts] = useState([]);
   const [featuredPosts, setFeaturedPosts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -48,6 +48,27 @@ export default function PostClient({ params }) {
       }
     };
 
+    const fetchRelatedPosts = async (currentPost) => {
+      try {
+        const relatedResponse = await fetch('/api/posts');
+        if (relatedResponse.ok) {
+          const relatedData = await relatedResponse.json();
+          // Filter posts from same category, exclude current post, limit to 9 for related section
+          const categoryFiltered = relatedData.posts.filter(p => 
+            p._id !== currentPost._id && 
+            p.categoryId === currentPost.categoryId
+          );
+          const limitedRelated = categoryFiltered.slice(0, 9);
+          setRelatedPosts(limitedRelated);
+          
+          // Get first 5 from same category for featured posts sidebar
+          setFeaturedPosts(categoryFiltered.slice(0, 5));
+        }
+      } catch (error) {
+        console.error('Error fetching related posts:', error);
+      }
+    };
+
     const fetchCategories = async () => {
       try {
         const response = await fetch('/api/categories');
@@ -61,10 +82,17 @@ export default function PostClient({ params }) {
     };
 
     if (resolvedParams.id) {
-      fetchPost();
-      fetchCategories();
+      // If we have initialPost, skip fetching post data but still fetch related posts
+      if (initialPost) {
+        fetchRelatedPosts(initialPost);
+        fetchCategories();
+      } else {
+        // No initialPost, fetch everything
+        fetchPost();
+        fetchCategories();
+      }
     }
-  }, [resolvedParams.id]);
+  }, [resolvedParams.id, initialPost]);
 
   const getMainImage = (post) => {
     if (post?.section1_images && post.section1_images.length > 0) {
