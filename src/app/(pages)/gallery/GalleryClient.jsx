@@ -17,7 +17,7 @@ export default function GalleryClient() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalPosts, setTotalPosts] = useState(0);
-  const [postsPerPage] = useState(20); // Number of posts per page
+  const [postsPerPage] = useState(50); // Number of posts per page
   
   const searchParams = useSearchParams();
 
