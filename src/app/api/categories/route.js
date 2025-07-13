@@ -21,14 +21,32 @@ export async function POST(request) {
     const data = await request.json();
     
     // Validate required fields
-    if (!data.name) {
+    if (!data.name || !data.name.trim()) {
       return NextResponse.json(
         { error: 'Category name is required' },
         { status: 400 }
       );
     }
     
-    const result = await createCategory(data);
+    // Validate custom_url if provided
+    if (data.custom_url && !/^[a-z0-9-]+$/.test(data.custom_url)) {
+      return NextResponse.json(
+        { error: 'Custom URL can only contain lowercase letters, numbers, and hyphens' },
+        { status: 400 }
+      );
+    }
+    
+    // Prepare category data with new fields
+    const categoryData = {
+      name: data.name.trim(),
+      thumbnail: data.thumbnail || '',
+      short_description: data.short_description || '',
+      long_description: data.long_description || '',
+      custom_url: data.custom_url || '',
+      keyword: data.keyword || ''
+    };
+    
+    const result = await createCategory(categoryData);
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
     console.error('Error creating category:', error);

@@ -175,6 +175,12 @@ export default function CategoriesManagement() {
                       Name
                     </th>
                     <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Custom URL
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Short Description
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
                       Created At
                     </th>
                     <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -201,6 +207,20 @@ export default function CategoriesManagement() {
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-800 dark:text-white/90">
                         {category.name}
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                        {category.custom_url ? (
+                          <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded dark:bg-blue-900 dark:text-blue-300">
+                            /{category.custom_url}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">Auto-generated</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="max-w-xs truncate" title={category.short_description}>
+                          {category.short_description || 'No description'}
+                        </div>
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                         {category.createdAt ? new Date(category.createdAt).toLocaleDateString() : 'N/A'}

@@ -4,7 +4,8 @@ import { getPostBySlugWithCategoryAdmin } from '@/lib/models';
 // GET /api/posts/admin/slug/[slug] - Get a specific post by slug including drafts (admin access)
 export async function GET(request, { params }) {
   try {
-    const post = await getPostBySlugWithCategoryAdmin(params.slug);
+    const resolvedParams = await params;
+    const post = await getPostBySlugWithCategoryAdmin(resolvedParams.slug);
     
     if (!post) {
       return NextResponse.json(

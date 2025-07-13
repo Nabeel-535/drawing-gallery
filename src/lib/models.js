@@ -32,6 +32,27 @@ async function ensureUniqueSlug(db, baseSlug, excludeId = null) {
   }
 }
 
+// Helper function to ensure unique category slug
+async function ensureUniqueCategorySlug(db, baseSlug, excludeId = null) {
+  let slug = baseSlug;
+  let counter = 1;
+  
+  while (true) {
+    const query = { custom_url: slug };
+    if (excludeId) {
+      query._id = { $ne: new ObjectId(excludeId) };
+    }
+    
+    const existingCategory = await db.collection('categories').findOne(query);
+    if (!existingCategory) {
+      return slug;
+    }
+    
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+}
+
 // Post model functions
 export async function getPosts() {
   const client = await clientPromise;
@@ -114,6 +135,38 @@ export async function getPostsByCategory(categoryId) {
   const client = await clientPromise;
   const db = client.db();
   return await db.collection('posts').find({ categoryId: categoryId, status: "Published" }).sort({ createdAt: -1 }).toArray();
+}
+
+export async function getPostsByCategoryPaginated(categoryId, page = 1, limit = 20) {
+  const client = await clientPromise;
+  const db = client.db();
+  
+  const skip = (page - 1) * limit;
+  const query = { categoryId: categoryId, status: "Published" };
+  
+  // Get total count for pagination
+  const totalPosts = await db.collection('posts').countDocuments(query);
+  const totalPages = Math.ceil(totalPosts / limit);
+  
+  // Get posts with pagination
+  const posts = await db.collection('posts')
+    .find(query)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .toArray();
+  
+  return {
+    posts,
+    pagination: {
+      currentPage: page,
+      totalPages,
+      totalPosts,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
+      limit
+    }
+  };
 }
 
 export async function getPostsByCategoryWithCategory(categoryId) {
@@ -375,11 +428,30 @@ export async function getCategoryById(id) {
   return await db.collection('categories').findOne({ _id: new ObjectId(id) });
 }
 
+export async function getCategoryByCustomUrl(customUrl) {
+  const client = await clientPromise;
+  const db = client.db();
+  return await db.collection('categories').findOne({ custom_url: customUrl });
+}
+
 export async function createCategory(categoryData) {
   const client = await clientPromise;
   const db = client.db();
+  
+  // Generate custom_url slug from name if not provided
+  let custom_url = categoryData.custom_url;
+  if (!custom_url && categoryData.name) {
+    custom_url = generateSlug(categoryData.name);
+  }
+  
+  // Ensure unique custom_url
+  if (custom_url) {
+    custom_url = await ensureUniqueCategorySlug(db, custom_url);
+  }
+  
   const result = await db.collection('categories').insertOne({
     ...categoryData,
+    custom_url,
     createdAt: new Date(),
     updatedAt: new Date()
   });
@@ -389,11 +461,24 @@ export async function createCategory(categoryData) {
 export async function updateCategory(id, categoryData) {
   const client = await clientPromise;
   const db = client.db();
+  
+  let updateData = { ...categoryData };
+  
+  // Handle custom_url updates
+  if (categoryData.name && !categoryData.custom_url) {
+    // Generate from name if no custom_url provided
+    const baseSlug = generateSlug(categoryData.name);
+    updateData.custom_url = await ensureUniqueCategorySlug(db, baseSlug, id);
+  } else if (categoryData.custom_url) {
+    // Ensure provided custom_url is unique
+    updateData.custom_url = await ensureUniqueCategorySlug(db, categoryData.custom_url, id);
+  }
+  
   const result = await db.collection('categories').updateOne(
     { _id: new ObjectId(id) },
     { 
       $set: {
-        ...categoryData,
+        ...updateData,
         updatedAt: new Date()
       } 
     }
