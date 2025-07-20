@@ -89,7 +89,7 @@ export default function CategoryPageClient({ category, initialPage = 1 }) {
           </h1>
           
           {category.short_description && (
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+            <p className="text-xl text-gray-600 px-10 mx-auto mb-8">
               {category.short_description}
             </p>
           )}
