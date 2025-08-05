@@ -211,12 +211,23 @@ export async function getPostsByCategoryWithCategoryAdmin(categoryId) {
 export async function getPostById(id) {
   const client = await clientPromise;
   const db = client.db();
+  
+  // Check if id is a valid ObjectId format
+  if (!ObjectId.isValid(id)) {
+    return null;
+  }
+  
   return await db.collection('posts').findOne({ _id: new ObjectId(id) });
 }
 
 export async function getPostByIdWithCategory(id) {
   const client = await clientPromise;
   const db = client.db();
+  
+  // Check if id is a valid ObjectId format
+  if (!ObjectId.isValid(id)) {
+    return null;
+  }
   
   // Get the published post for public access
   const post = await db.collection('posts').findOne({ _id: new ObjectId(id), status: "Published" });
@@ -242,6 +253,11 @@ export async function getPostByIdWithCategory(id) {
 export async function getPostByIdWithCategoryAdmin(id) {
   const client = await clientPromise;
   const db = client.db();
+  
+  // Check if id is a valid ObjectId format
+  if (!ObjectId.isValid(id)) {
+    return null;
+  }
   
   // Get the post regardless of status for admin access
   const post = await db.collection('posts').findOne({ _id: new ObjectId(id) });
@@ -425,6 +441,12 @@ export async function getCategories() {
 export async function getCategoryById(id) {
   const client = await clientPromise;
   const db = client.db();
+  
+  // Check if id is a valid ObjectId format (24 character hex string)
+  if (!ObjectId.isValid(id)) {
+    return null;
+  }
+  
   return await db.collection('categories').findOne({ _id: new ObjectId(id) });
 }
 

@@ -44,7 +44,7 @@ export default async function sitemap() {
     const postPages = posts
       .filter(post => post.url_slug) // Ensure post has a slug
       .map((post) => ({
-        url: `${baseUrl}/post/${post.url_slug}`,
+        url: `${baseUrl}/${post.url_slug}`,
         lastModified: new Date(post.updatedAt || post.createdAt),
         changeFrequency: 'monthly',
         priority: 0.7,

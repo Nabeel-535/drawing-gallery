@@ -67,7 +67,7 @@ export default function CategoriesClient() {
           {categories.map((category) => (
             <Link
               key={category._id}
-              href={`/${category.custom_url || category._id}`}
+              href={`/category/${category.custom_url || category._id}`}
               className="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 text-left block"
             >
               {/* Category Thumbnail */}

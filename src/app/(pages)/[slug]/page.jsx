@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import PostClient from '@/components/PostClient';
 import { getPostsWithCategory, getPostBySlugWithCategory } from '@/lib/models';
+import { notFound } from 'next/navigation';
 
 // Configuration for build optimization
 const BUILD_CONFIG = {
@@ -103,7 +104,7 @@ export async function generateStaticParams() {
       .slice(0, BUILD_CONFIG.STATIC_PAGES_LIMIT); // Limit to prevent build timeouts
     
     const params = recentPosts.map((post) => ({
-      id: post.url_slug
+      slug: post.url_slug
     }));
     
     console.log(`Generated ${params.length} static params for posts (limited to ${BUILD_CONFIG.STATIC_PAGES_LIMIT} to prevent build timeouts)`);
@@ -118,7 +119,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }) {
   // Ensure params is properly resolved
   const resolvedParams = await Promise.resolve(params);
-  const post = await getPost(resolvedParams.id);
+  const post = await getPost(resolvedParams.slug);
 
   
   if (!post) {
@@ -177,34 +178,20 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default async function PostDetailPage({ params }) {
-  // Resolve params and fetch post data at the server component level
+export default async function SlugPage({ params }) {
+  // Resolve params and check if it's a post
   const resolvedParams = await Promise.resolve(params);
-  const post = await getPost(resolvedParams.id);
+  const { slug } = resolvedParams;
   
-  // Handle not found case
-  if (!post) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50">
-        <div className="container mx-auto px-4 py-20">
-          <div className="text-center">
-            <div className="text-6xl mb-4">😞</div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Post Not Found</h1>
-            <p className="text-gray-600 mb-8">The post you're looking for doesn't exist or has been removed.</p>
-            <a 
-              href="/gallery" 
-              className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Back to Gallery
-            </a>
-          </div>
-        </div>
-      </div>
-    );
+  // Try to find a post with this slug
+  const post = await getPost(slug);
+  
+  if (post) {
+    // It's a post - render the post page
+    const serializedPost = serializePost(post);
+    return <PostClient params={Promise.resolve({ id: slug })} initialPost={serializedPost} />;
   }
   
-  // Serialize the post data before passing to client component
-  const serializedPost = serializePost(post);
-  
-  return <PostClient params={Promise.resolve(params)} initialPost={serializedPost} />;
+  // Post not found - 404
+  notFound();
 }

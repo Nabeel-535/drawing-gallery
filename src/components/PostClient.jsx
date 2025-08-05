@@ -405,7 +405,7 @@ export default function PostClient({ params, initialPost = null }) {
                   {relatedPosts.map((relatedPost) => (
                     <Link
                       key={relatedPost._id}
-                      href={`/post/${relatedPost.url_slug}`}
+                      href={`/${relatedPost.url_slug}`}
                       className="group bg-gray-50 rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300"
                     >
                       <div className="relative aspect-square overflow-hidden">
@@ -442,7 +442,7 @@ export default function PostClient({ params, initialPost = null }) {
                     {featuredPosts.map((featuredPost) => (
                       <Link
                         key={featuredPost._id}
-                        href={`/post/${featuredPost.url_slug}`}
+                        href={`/${featuredPost.url_slug}`}
                         className="group flex space-x-3 hover:bg-gray-50 p-2 rounded-lg transition-colors"
                       >
                         <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">

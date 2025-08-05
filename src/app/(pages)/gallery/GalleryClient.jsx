@@ -346,7 +346,7 @@ export default function GalleryClient() {
             {posts.map((post) => (
               <Link
                 key={post._id}
-                href={`/post/${post.url_slug}`}
+                href={`/${post.url_slug}`}
                 className="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
                 {/* Image */}
