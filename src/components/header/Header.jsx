@@ -28,7 +28,13 @@ export default function Header() {
       return pathname === "/";
     }
     if (href === "/#about") {
-      return pathname === "/" && window.location.hash === "#about";
+      // Use URL constructor to avoid direct window.location access during render
+      try {
+        const url = new URL(window.location.href);
+        return pathname === "/" && url.hash === "#about";
+      } catch {
+        return pathname === "/";
+      }
     }
     return pathname.startsWith(href);
   };
@@ -100,6 +106,7 @@ export default function Header() {
                   <button
                     type="submit"
                     className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    aria-label="Search"
                   >
                     <svg className="w-4 h-4 text-gray-400 hover:text-red-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5-5 5M6 12h12" />
@@ -180,6 +187,7 @@ export default function Header() {
                   <button
                     type="submit"
                     className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    aria-label="Search"
                   >
                     <svg className="w-4 h-4 text-gray-400 hover:text-red-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5-5 5M6 12h12" />

@@ -12,15 +12,16 @@ export const Modal = ({
   const modalRef = useRef(null);
 
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleEscape = (event) => {
       if (event.key === "Escape") {
         onClose();
       }
     };
 
-    if (isOpen) {
-      document.addEventListener("keydown", handleEscape);
-    }
+    // Only add event listener when modal is open
+    document.addEventListener("keydown", handleEscape, { passive: true });
 
     return () => {
       document.removeEventListener("keydown", handleEscape);
@@ -28,11 +29,14 @@ export const Modal = ({
   }, [isOpen, onClose]);
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
+    // Batch DOM style changes to avoid forced reflows
+    requestAnimationFrame(() => {
+      if (isOpen) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "unset";
+      }
+    });
 
     return () => {
       document.body.style.overflow = "unset";

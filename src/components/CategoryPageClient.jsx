@@ -49,9 +49,12 @@ export default function CategoryPageClient({ category, initialPage = 1 }) {
   const handlePageChange = (newPage) => {
     setPagination(prev => ({ ...prev, currentPage: newPage }));
     // Update URL without navigating - keep current pathname
-    const url = new URL(window.location);
-    url.searchParams.set('page', newPage.toString());
-    window.history.pushState({}, '', url);
+    // Use requestAnimationFrame to avoid forced reflow during DOM manipulation
+    requestAnimationFrame(() => {
+      const url = new URL(window.location);
+      url.searchParams.set('page', newPage.toString());
+      window.history.pushState({}, '', url);
+    });
   };
 
   // Helper function to get main image

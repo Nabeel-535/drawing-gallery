@@ -20,19 +20,30 @@ export const SidebarProvider = ({ children }) => {
   const [openSubmenu, setOpenSubmenu] = useState(null);
 
   useEffect(() => {
+    // Use requestAnimationFrame to batch DOM reads/writes and avoid forced reflows
     const handleResize = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      if (!mobile) {
-        setIsMobileOpen(false);
-      }
+      requestAnimationFrame(() => {
+        const mobile = window.innerWidth < 768;
+        setIsMobile(mobile);
+        if (!mobile) {
+          setIsMobileOpen(false);
+        }
+      });
+    };
+
+    // Debounce resize handler to reduce frequency of calls
+    let resizeTimeout;
+    const debouncedResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(handleResize, 100);
     };
 
     handleResize();
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", debouncedResize, { passive: true });
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", debouncedResize);
+      clearTimeout(resizeTimeout);
     };
   }, []);
 

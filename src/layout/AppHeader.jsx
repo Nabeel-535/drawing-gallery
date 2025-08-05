@@ -13,7 +13,9 @@ const AppHeader = () => {
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
 
   const handleToggle = () => {
-    if (window.innerWidth >= 1024) {
+    // Use CSS media query match instead of window.innerWidth to avoid forced reflow
+    const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+    if (isDesktop) {
       toggleSidebar();
     } else {
       toggleMobileSidebar();
