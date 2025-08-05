@@ -1,38 +1,49 @@
-"use client";
-
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import YouTubeVideo from '@/components/youtube/YouTubeVideo';
+import RequestDrawingButton from '@/components/RequestDrawingButton';
+import { getPostsWithCategory } from "@/lib/models";
 
-export default function HomePage() {
-  const [latestPosts, setLatestPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+// Helper function to serialize MongoDB objects to plain objects
+function serializePosts(posts) {
+  if (!posts) return [];
+  
+  return posts.map(post => ({
+    ...post,
+    _id: post._id.toString(),
+    categoryId: post.categoryId?.toString() || null,
+    createdAt: post.createdAt?.toISOString() || null,
+    updatedAt: post.updatedAt?.toISOString() || null,
+    category: post.category ? {
+      ...post.category,
+      _id: post.category._id.toString(),
+      createdAt: post.category.createdAt?.toISOString() || null,
+      updatedAt: post.category.updatedAt?.toISOString() || null,
+    } : null,
+  }));
+}
 
-  // Fetch latest posts
-  useEffect(() => {
-    const fetchLatestPosts = async () => {
-      try {
-        const response = await fetch("/api/posts");
-        const data = await response.json();
-        
-        if (data.success && data.posts) {
-          // Get the latest 10 posts
-          setLatestPosts(data.posts.slice(0, 10));
-        }
-      } catch (error) {
-        console.error("Error fetching latest posts:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+// Server-side data fetching
+async function getLatestPosts() {
+  try {
+    const posts = await getPostsWithCategory();
+    return posts ? posts.slice(0, 10) : [];
+  } catch (error) {
+    console.error("Error fetching latest posts:", error);
+    return [];
+  }
+}
 
-    fetchLatestPosts();
-  }, []);
+export default async function HomePage() {
+  // Fetch data on the server
+  const latestPostsData = await getLatestPosts();
+  const latestPosts = serializePosts(latestPostsData);
 
   const getMainImage = (post) => {
     return post.featuredImage || "/placeholder-image.jpg";
   };
+
   return (
     <div className="mainbg">
       {/* SEO Meta Tags would be in layout or head */}
@@ -92,68 +103,58 @@ export default function HomePage() {
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                 Latest Drawing Tutorials & Coloring Pages
               </h2>
-              
             </div>
 
-            {loading ? (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-red-600 mx-auto"></div>
-                <p className="mt-4 text-gray-600">Loading latest posts...</p>
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-12">
-                  {latestPosts.map((post) => (
-                    <Link
-                      key={post._id}
-                      href={`/${post.url_slug}`}
-                      className="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105"
-                    >
-                      {/* Image */}
-                      <div className="relative aspect-square overflow-hidden">
-                        <Image
-                          src={getMainImage(post)}
-                          alt={post.title}
-                          fill
-                          className="object-cover group-hover:scale-110 transition-transform duration-300"
-                          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
-                        />
-                      
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-12">
+              {latestPosts.map((post) => (
+                <Link
+                  key={post._id}
+                  href={`/${post.url_slug}`}
+                  className="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105"
+                >
+                  {/* Image */}
+                  <div className="relative aspect-square overflow-hidden">
+                    <Image
+                      src={getMainImage(post)}
+                      alt={post.title}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-300"
+                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
+                      priority={false}
+                    />
 
-                        {/* Category Badge */}
-                        {post.category && (
-                          <div className="absolute top-2 left-2">
-                            <span className="bg-red-600 text-white text-xs px-2 py-1 rounded-full font-medium">
-                              {post.category.name}
-                            </span>
-                          </div>
-                        )}
+                    {/* Category Badge */}
+                    {post.category && (
+                      <div className="absolute top-2 left-2">
+                        <span className="bg-red-600 text-white text-xs px-2 py-1 rounded-full font-medium">
+                          {post.category.name}
+                        </span>
                       </div>
+                    )}
+                  </div>
 
-                      {/* Content */}
-                      <div className="p-4">
-                        <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 group-hover:text-red-600 text-center transition-colors">
-                          {post.title}
-                        </h3>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+                  {/* Content */}
+                  <div className="p-4">
+                    <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 group-hover:text-red-600 text-center transition-colors">
+                      {post.title}
+                    </h3>
+                  </div>
+                </Link>
+              ))}
+            </div>
 
-                {/* View All Button */}
-                <div className="text-center">
-                  <Link
-                    href="/gallery"
-                    className="inline-flex items-center space-x-2 px-8 py-4 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 hover:shadow-xl hover:scale-105 transition-all duration-200"
-                  >
-                    <span>View All Coloring Pages</span>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </Link>
-                </div>
-              </>
-            )}
+            {/* View All Button */}
+            <div className="text-center">
+              <Link
+                href="/gallery"
+                className="inline-flex items-center space-x-2 px-8 py-4 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 hover:shadow-xl hover:scale-105 transition-all duration-200"
+              >
+                <span>View All Coloring Pages</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -257,15 +258,7 @@ export default function HomePage() {
             Have a specific drawing in mind? We create custom artwork just for you! Whether it's a cartoon, anime, or your favorite game character – your ideas can be turned into coloring pages.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={() => document.getElementById('request-drawing-btn').click()}
-                className="flex items-center justify-center space-x-2 px-8 py-4 bg-white text-green-600 rounded-xl font-semibold hover:shadow-xl hover:scale-105 transition-all duration-200"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-                <span>Request Now</span>
-              </button>
+              <RequestDrawingButton />
               <Link
                 href="/gallery"
                 className="px-8 py-4 border-2 border-white text-white rounded-xl font-semibold hover:bg-white hover:text-green-600 transition-all duration-200"

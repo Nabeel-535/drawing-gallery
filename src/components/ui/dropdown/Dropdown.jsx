@@ -10,6 +10,8 @@ export const Dropdown = ({
   const dropdownRef = useRef(null);
 
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleClickOutside = (event) => {
       if (
         dropdownRef.current &&
@@ -20,11 +22,12 @@ export const Dropdown = ({
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    // Use passive event listener and only add when dropdown is open
+    document.addEventListener("mousedown", handleClickOutside, { passive: true });
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [onClose]);
+  }, [onClose, isOpen]);
 
   if (!isOpen) return null;
 
