@@ -4,6 +4,9 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { use } from 'react';
+import AdSenseResponsive from '@/components/common/AdSenseResponsive';
+import AdSenseArticle from '@/components/common/AdSenseArticle';
+import AdSenseVertical from '@/components/common/AdSenseVertical';
 
 export default function PostClient({ params, initialPost = null }) {
   const resolvedParams = use(params);
@@ -183,6 +186,9 @@ export default function PostClient({ params, initialPost = null }) {
               )}
             </div>
 
+            {/* AdSense - Top of Article */}
+            <AdSenseResponsive adSlot="3876099937" className="mb-8" />
+
             {/* Section 1: Drawing Steps */}
             {post.section1_images && post.section1_images.length > 0 && (
               <div className="mb-8 w-full">
@@ -331,6 +337,9 @@ export default function PostClient({ params, initialPost = null }) {
               </div>
             </div>
 
+            {/* AdSense - Between Sections */}
+            <AdSenseArticle adSlot="8713493649" className="my-8" />
+
             {/* Section 2: Additional Resources */}
             {post.section2_images && post.section2_images.length > 0 && (
               <div className="mb-8">
@@ -393,6 +402,9 @@ export default function PostClient({ params, initialPost = null }) {
                 </a>
               )}
             </div>
+
+            {/* AdSense - Before Related Posts */}
+            <AdSenseResponsive adSlot="4151416198" className="my-8" />
 
             {/* Related Posts */}
             {relatedPosts.length > 0 && (
@@ -470,6 +482,11 @@ export default function PostClient({ params, initialPost = null }) {
                 </div>
               )}
 
+              {/* Vertical Ad Unit */}
+              <div className="flex justify-center my-8">
+                <AdSenseVertical adSlot="3625620829" />
+              </div>
+
               {/* Categories Section */}
               {categories.length > 0 && (
                 <div className="bg-white rounded-xl p-6 shadow-lg">
@@ -507,6 +524,11 @@ export default function PostClient({ params, initialPost = null }) {
                   </div>
                 </div>
               )}
+
+               {/* Vertical Ad Unit */}
+              <div className="flex justify-center my-8">
+                <AdSenseVertical adSlot="7208840284" />
+              </div>
 
               {/* YouTube CTA */}
               <div className="bg-gradient-to-r from-red-600 to-orange-600 rounded-xl p-6 text-white">
