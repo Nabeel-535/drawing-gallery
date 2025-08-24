@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
+import AdSenseResponsive from '@/components/common/AdSenseResponsive';
 
 export default function CategoryPageClient({ category, initialPage = 1 }) {
   const [posts, setPosts] = useState([]);
@@ -107,6 +108,11 @@ export default function CategoryPageClient({ category, initialPage = 1 }) {
               {pagination.totalPosts} Coloring Pages
             </span>
           </div>
+        </div>
+
+        {/* AdSense - After Category Description */}
+        <div className="py-8">
+          <AdSenseResponsive adSlot="1441508283" />
         </div>
 
         {/* Loading State */}
@@ -220,6 +226,11 @@ export default function CategoryPageClient({ category, initialPage = 1 }) {
             </Link>
           </div>
         )}
+
+         {/* AdSense - before Category Description */}
+        <div className="py-8">
+          <AdSenseResponsive adSlot="8725101934" />
+        </div>
 
         {/* Long Description */}
         {category.long_description && (

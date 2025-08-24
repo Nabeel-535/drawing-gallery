@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import YouTubeVideo from '@/components/youtube/YouTubeVideo';
 import RequestDrawingButton from '@/components/RequestDrawingButton';
+import AdSenseResponsive from '@/components/common/AdSenseResponsive';
 import { getPostsWithCategory } from "@/lib/models";
 
 // Helper function to serialize MongoDB objects to plain objects
@@ -95,6 +96,12 @@ export default async function HomePage() {
           </div>
         </section>
 
+        {/* AdSense - After Hero Section */}
+        <section className="py-8">
+          <div className="container mx-auto px-4">
+            <AdSenseResponsive adSlot="8905065331" />
+          </div>
+        </section>
         
         {/* Latest Posts Section */}
         <section className="py-20">
