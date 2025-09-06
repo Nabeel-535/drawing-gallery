@@ -43,7 +43,7 @@ export default function Header() {
   const getLinkClasses = (href) => {
     const baseClasses = "transition-colors dark:text-gray-300";
     const activeClasses = "text-red-600 font-semibold bg-[#f0f0f0] py-4 px-4";
-    const inactiveClasses = "text-gray-700 hover:text-red-600";
+    const inactiveClasses = "text-gray-900 hover:text-red-600";
     
     return `${baseClasses} ${isActiveLink(href) ? activeClasses : inactiveClasses}`;
   };
@@ -153,7 +153,7 @@ export default function Header() {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-900"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   {isMenuOpen ? (
@@ -206,7 +206,7 @@ export default function Header() {
                 <Link href="/categories" className={getLinkClasses("/categories")}>
                   Categories
                 </Link>
-                <Link href="https://www.youtube.com/@Drawing-Gallery/playlists" className="text-gray-700 hover:text-red-600 transition-colors">
+                <Link href="https://www.youtube.com/@Drawing-Gallery/playlists" className="text-gray-900 hover:text-red-600 transition-colors">
                 Video Playlist
               </Link>
                 <Link href="/#about" className={getLinkClasses("/#about")}>
