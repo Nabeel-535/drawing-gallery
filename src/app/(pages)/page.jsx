@@ -113,7 +113,7 @@ export default async function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-12">
-              {latestPosts.map((post) => (
+              {latestPosts.map((post, index) => (
                 <Link
                   key={post._id}
                   href={`/${post.url_slug}`}
@@ -127,7 +127,7 @@ export default async function HomePage() {
                       fill
                       className="object-cover group-hover:scale-110 transition-transform duration-300"
                       sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
-                      priority={false}
+                      priority={index < 5}
                     />
 
                     {/* Category Badge */}

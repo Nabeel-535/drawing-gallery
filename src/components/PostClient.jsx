@@ -206,9 +206,10 @@ export default function PostClient({ params, initialPost = null }) {
                               alt={image.title || `Step ${index + 1}`}
                               width={1200}
                               height={1200}
-                              quality={100}
-                              unoptimized={true}
+                              quality={85}
+                              priority={index === 0}
                               className="object-contain bg-white w-full h-auto"
+                              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 80vw, 60vw"
                             />
                           </div>
                         )}
@@ -414,7 +415,7 @@ export default function PostClient({ params, initialPost = null }) {
                 </h2>
                 
                 <div className="grid grid-cols-3 gap-6">
-                  {relatedPosts.map((relatedPost) => (
+                  {relatedPosts.map((relatedPost, index) => (
                     <Link
                       key={relatedPost._id}
                       href={`/${relatedPost.url_slug}`}
@@ -426,6 +427,8 @@ export default function PostClient({ params, initialPost = null }) {
                           alt={relatedPost.title}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                          priority={false}
                         />
                       </div>
                       <div className="p-4">
