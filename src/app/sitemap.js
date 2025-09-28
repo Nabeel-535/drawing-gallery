@@ -1,7 +1,9 @@
 ﻿import { getPostsWithCategory } from '@/lib/models';
 
-export const revalidate = 60;
-export const dynamic = 'force-dynamic';
+export const revalidate = 0; 
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const dynamicParams = true;
 
 export default async function sitemap() {
     const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
