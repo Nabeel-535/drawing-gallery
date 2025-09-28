@@ -1,4 +1,6 @@
-import { getPostsWithCategory } from '@/lib/models';
+﻿import { getPostsWithCategory } from '@/lib/models';
+
+export const revalidate = 60;
 
 export default async function sitemap() {
     const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
