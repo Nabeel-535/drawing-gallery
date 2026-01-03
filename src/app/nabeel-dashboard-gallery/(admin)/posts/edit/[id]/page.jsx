@@ -21,6 +21,7 @@ export default function EditPost({ params }) {
   const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(true); // Default to true for edit mode
   const [formData, setFormData] = useState({
     title: "",
+    meta_title: "",
     url_slug: "",
     content: "",
     categoryId: "",
@@ -117,6 +118,7 @@ export default function EditPost({ params }) {
         setCategories(categoriesData);
         setFormData({
           title: postData.title || "",
+          meta_title: postData.meta_title || "",
           url_slug: postData.url_slug || "",
           content: postData.content || "",
           categoryId: postData.categoryId || "",
@@ -348,6 +350,27 @@ export default function EditPost({ params }) {
                 required
                 className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white/90"
               />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                The main title displayed on your post page
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="meta_title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Meta Title (SEO)
+              </label>
+              <input
+                type="text"
+                id="meta_title"
+                name="meta_title"
+                value={formData.meta_title}
+                onChange={handleChange}
+                placeholder="Leave empty to use the main title"
+                className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white/90"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Optional: Custom title for search engines and browser tabs. If left empty, the main title will be used.
+              </p>
             </div>
 
             <div>
